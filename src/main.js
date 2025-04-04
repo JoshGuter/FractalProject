@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { GUI } from 'dat.gui';
 
 function createSierpinski(level, size, position = new THREE.Vector3()) {
   if (level === 0) {
@@ -34,13 +35,33 @@ const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
-const fractals = createSierpinski(2, 1);
-fractals.forEach(f => scene.add(f));
+let group = new THREE.Group();
+scene.add(group);
+
+function generateFractal(level) {
+  group.clear();
+  const fractals = createSierpinski(level, 1);
+  fractals.forEach(f => group.add(f));
+}
+
+const settings = {
+  level: 2,
+  rotationSpeed: 0.003,
+};
+
+generateFractal(settings.level);
+
+// GUI
+const gui = new GUI();
+gui.add(settings, 'level', 0, 4, 1).name('Fractal Level').onChange(() => {
+  generateFractal(settings.level);
+});
+gui.add(settings, 'rotationSpeed', 0.001, 0.05).name('Rotation Speed');
 
 // Animate
 function animate() {
   requestAnimationFrame(animate);
-  scene.rotation.y += 0.003;
+  group.rotation.y += settings.rotationSpeed;
   renderer.render(scene, camera);
 }
 animate();
